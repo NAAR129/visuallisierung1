@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>x² = 10x + 39 — Deutsch (kompakte Ansicht)</title>
+<style>
+  :root { --card:#ffffff; --ink:#111; }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:#f6f7fb; color:var(--ink);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap { min-height:100vh; display:grid; place-items:center; padding:20px; }
+  .panel { width:min(100%, 860px); }
+  h1 {
+    text-align:center; margin:0 0 10px;
+    font-weight:800; letter-spacing:.2px;
+  }
+  .toolbar {
+    display:flex; gap:10px; justify-content:center;
+    flex-wrap:wrap; margin-bottom:10px;
+  }
+  button {
+    padding:8px 12px; border-radius:10px;
+    border:1px solid #d1d5db; background:#fff; cursor:pointer;
+    box-shadow:0 2px 4px rgba(0,0,0,.05);
+  }
+  button:hover { background:#f3f4f6; }
+  .canvas {
+    background:var(--card);
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    box-shadow:0 4px 16px rgba(0,0,0,.05);
+    padding:8px;
+    width:100%;
+    max-width:720px;
+    margin:0 auto;
+  }
+  svg {
+    display:block;
+    width:100%;
+    height:auto;
+    aspect-ratio:1/1; /* cuadrado proporcional */
+    border-radius:12px;
+  }
+  .slider {
+    margin:10px auto 0;
+    display:flex; align-items:center; gap:10px; justify-content:center;
+  }
+  .slider input {
+    width:min(600px, 90%);
+  }
+  .label { font-weight:700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="panel">
+    <h1>x² = 10x + 39</h1>
+    <div class="toolbar">
+      <button id="play">Abspielen</button>
+      <button id="pause">Pause</button>
+      <button id="reset">Zurücksetzen</button>
+    </div>
+
+    <div class="canvas">
+      <svg id="svg" viewBox="0 0 560 520" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="slider">
+      <span class="label">Schritt</span>
+      <input id="step" type="range" min="0" max="5" step="1" value="0" />
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const svg = document.getElementById("svg");
+  const playBtn = document.getElementById("play");
+  const pauseBtn = document.getElementById("pause");
+  const resetBtn = document.getElementById("reset");
+  const stepInput = document.getElementById("step");
+
+  let step = 0, timer = null;
+  const pad=40, s=20, x=13;
+  const ax=pad, ay=pad;
+
+  const el=n=>document.createElementNS("http://www.w3.org/2000/svg",n);
+  const clear=()=>{while(svg.firstChild)svg.removeChild(svg.firstChild);};
+  const line=(x1,y1,x2,y2,col="#111",w=2)=>{
+    const L=el("line");
+    L.setAttribute("x1",x1);L.setAttribute("y1",y1);
+    L.setAttribute("x2",x2);L.setAttribute("y2",y2);
+    L.setAttribute("stroke",col);L.setAttribute("stroke-width",w);
+    svg.appendChild(L);
+  };
+  const rect=(x,y,w,h,fill,stroke="#111",sw=2)=>{
+    const R=el("rect");
+    R.setAttribute("x",x);R.setAttribute("y",y);
+    R.setAttribute("width",w);R.setAttribute("height",h);
+    R.setAttribute("fill",fill);R.setAttribute("stroke",stroke);
+    R.setAttribute("stroke-width",sw);
+    svg.appendChild(R);
+  };
+  const text=(x,y,t,col="#111",sz=16,wt=800)=>{
+    const T=el("text");
+    T.setAttribute("x",x);T.setAttribute("y",y);
+    T.setAttribute("text-anchor","middle");
+    T.setAttribute("dominant-baseline","middle");
+    T.setAttribute("font-size",sz);T.setAttribute("font-weight",wt);
+    T.setAttribute("fill",col);
+    T.textContent=t; svg.appendChild(T);
+  };
+  const path=(d,fill,stroke="#3b82f6",sw=1.5)=>{
+    const P=el("path");
+    P.setAttribute("d",d);P.setAttribute("fill",fill);
+    P.setAttribute("stroke",stroke);P.setAttribute("stroke-width",sw);
+    svg.appendChild(P);
+  };
+
+  function draw(){
+    clear();
+
+    // Schritt 1
+    if(step>=1){
+      rect(ax, ay, x*s, x*s, "#e0f2fe", "#0ea5e9", 2);
+      if(step===1) text(ax + x*s/2, ay + x*s/2, "x²", "#0b5670", 18);
+      if(step<=4){
+        line(ax, ay-14, ax + x*s, ay-14, "#0ea5e9", 1.5);
+        text(ax + x*s/2, ay-22, "x", "#0ea5e9", 12, 800);
+        line(ax-14, ay, ax-14, ay + x*s, "#0ea5e9", 1.5);
+        text(ax-22, ay + x*s/2, "x", "#0ea5e9", 12, 800);
+      }
+    }
+
+    // Schritt 2
+    if(step===2){
+      rect(ax, ay, x*s, (x-10)*s, "rgba(168,85,247,.12)", "#a855f7", 2);
+      text(ax + x*s/2, ay + (x-10)*s/2, "39", "#6d28d9", 16);
+      rect(ax, ay + (x-10)*s, x*s, 10*s, "rgba(34,197,94,.12)", "#16a34a", 2);
+      text(ax + x*s/2, ay + (x-10)*s + 5*s, "10x", "#166534", 16);
+      line(ax, ay + (x-10)*s, ax + x*s, ay + (x-10)*s, "#16a34a", 2);
+    }
+
+    // Schritt 3
+    if(step===3){
+      rect(ax, ay, x*s, (x-10)*s, "rgba(168,85,247,.12)", "#a855f7", 2);
+      text(ax + x*s/2, ay + (x-10)*s/2, "39", "#6d28d9", 16);
+      rect(ax, ay + (x-10)*s, x*s, 10*s, "rgba(34,197,94,.12)", "#16a34a", 2);
+      line(ax, ay + (x-5)*s, ax + x*s, ay + (x-5)*s, "#22c55e", 2);
+      text(ax + x*s/2, ay + (x-7.5)*s, "5x", "#166534", 14);
+      text(ax + x*s/2, ay + (x-2.5)*s, "5x", "#166534", 14);
+    }
+
+    // Schritt 4
+    if(step===4){
+      rect(ax, ay + (x-5)*s, x*s, 5*s, "#bbf7d0", "#22c55e", 2);
+      rect(ax + (x-5)*s, ay, 5*s, x*s, "#bbf7d0", "#22c55e", 2);
+      rect(ax + (x-5)*s, ay + (x-5)*s, 5*s, 5*s, "#e9d5ff", "#a855f7", 2);
+      rect(ax + 3*s, ay + 3*s, 5*s, 5*s, "#e9d5ff", "#a855f7", 2);
+      text(ax + (x-2.5)*s, ay + (x-2.5)*s, "25", "#5b21b6", 14);
+      text(ax + 5.5*s, ay + 5.5*s, "25", "#5b21b6", 14);
+      const dL = ["M", ax, ay, "L", ax + 8*s, ay, "L", ax + 8*s, ay + 3*s, "L", ax + 3*s, ay + 3*s, "L", ax + 3*s, ay + 8*s, "L", ax, ay + 8*s, "Z"].join(" ");
+      path(dL, "#c7d2fe", "#3b82f6", 1.5);
+      text(ax + 4*s, ay + 1.5*s, "39", "#1d4ed8", 12);
+      line(ax + (x-5)*s, ay-22, ax + x*s, ay-22, "#a855f7", 2);
+      text(ax + (x-2.5)*s, ay-30, "5", "#a855f7", 12);
+      line(ax-22, ay + (x-5)*s, ax-22, ay + x*s, "#a855f7", 2);
+      text(ax-30, ay + (x-2.5)*s, "5", "#a855f7", 12);
+    }
+
+    // Schritt 5: Endbild kompakt
+    if(step===5){
+      rect(ax, ay, 8*s, 8*s, "#fb923c", "#fb923c", 2);
+      text(ax + 4*s, ay + 4*s, "39+25=64", "#1f2937", 16, 800);
+      rect(ax + 8*s, ay, 5*s, 8*s, "#bbf7d0", "#22c55e", 2);
+      rect(ax, ay + 8*s, 8*s, 5*s, "#bbf7d0", "#22c55e", 2);
+      rect(ax + 8*s, ay + 8*s, 5*s, 5*s, "#e9d5ff", "#a855f7", 2);
+      text(ax + 10.5*s, ay + 10.5*s, "25", "#5b21b6", 14, 800);
+
+      // Marken 8 und 5
+      const y8=ay-18, y5=ay-4;
+      line(ax, y8, ax+8*s, y8, "#3b82f6", 2); text(ax+4*s, y8-6, "8", "#3b82f6", 12, 800);
+      line(ax+8*s, y5, ax+13*s, y5, "#a855f7", 2); text(ax+10.5*s, y5-6, "5", "#a855f7", 12, 800);
+      const x8=ax-18, x5=ax-4;
+      line(x8, ay, x8, ay+8*s, "#3b82f6", 2); text(x8-6, ay+4*s, "8", "#3b82f6", 12, 800);
+      line(x5, ay+8*s, x5, ay+13*s, "#a855f7", 2); text(x5-6, ay+10.5*s, "5", "#a855f7", 12, 800);
+
+      text(ax + (13*s)/2, ay + 13*s + 20, "x = 13 (8 + 5)", "#111", 16, 800);
+    }
+
+    // Schritt 0
+    if(step===0){
+      rect(ax, ay, x*s, x*s, "#fff", "#ddd", 1);
+      text(ax + x*s/2, ay + x*s/2, "x² = 10x + 39", "#111", 20, 800);
+    }
+  }
+
+  function gotoStep(n, stopTimer=true){
+    step = Math.max(0, Math.min(5, n));
+    stepInput.value = step;
+    draw();
+    if(stopTimer) pause();
+  }
+  function play(){ pause(); timer=setInterval(()=>{ step<5 ? gotoStep(step+1,false) : pause(); }, 2800); }
+  function pause(){ if(timer){ clearInterval(timer); timer=null; } }
+  function reset(){ pause(); gotoStep(0); }
+
+  playBtn.onclick = play;
+  pauseBtn.onclick = pause;
+  resetBtn.onclick = reset;
+  stepInput.oninput = e => gotoStep(parseInt(e.target.value), true);
+
+  gotoStep(0,false);
+  play();
+})();
+</script>
+</body>
+</html>
